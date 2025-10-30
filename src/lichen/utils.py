@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from typing import Union, List, Optional
 
 
 MAP_FR1_FR3 = {'NI': ['SL'],
@@ -175,6 +176,23 @@ MAP_GENE_SEED = {'IGLV1-36': ['QSVLTQPPSV'], 'IGLV1-40': ['QSVLTQPPSV', 'QSVVTQP
                      'IGKV3/OR2-268': ['EIVMTQSPAT', 'EIVMTQSPAT'], 'IGKV3D-11': ['EIVLTQSPAT', 'EIVLTQSPAT', 'EIVLTQSPAT'], 'IGKV3D-15': ['EIVMTQSPAT', 'EIVMMQSPAT', 'EIVMTQSPAT'], 
                      'IGKV3D-20': ['EIVLTQSPAT', 'EIVLTQSPAT'], 'IGKV3D-7': ['EIVMTQSPAT'], 'IGKV4-1': ['DIVMTQSPDS', 'DIVMTQSPDS', 'DIVMTQSPDS'], 'IGKV5-2': ['ETTLTQSPAF', 'ETTLTQSPAF'], 
                      'IGKV6-21': ['EIVLTQSPDF', 'EIVLTQSPDF'], 'IGKV6D-21': ['EIVLTQSPDF', 'EIVLTQSPDF'], 'IGKV6D-41': ['DVVMTQSPAF'], 'IGKV7-3': ['DIVLTQSPAS']}
+
+# Definitions for liabilities
+LIST_LIABILITIES = ["N-linked glycosylation (NXS/T X not P),fv,N[^P][ST]",
+                    "Met oxidation (M),cdrs;verniers,M",
+                    "Trp oxidation (W),cdrs;verniers,W",
+                    "Asn deamidation (NG NS NT),cdrs;verniers,N[GST]",
+                    "Asp isomerisation (DG DS DT DD DH),cdrs;verniers,D[GSTDH]",
+                    "Lysine Glycation (KE KD EK ED),cdrs;verniers,KE|KD|EK|ED",
+                    "N-terminal glutamate (VH and VL) (E),nterminus,E",
+                    "Integrin binding (RGD RYD LDV),fv,RGD|RYD|LDV",
+                    "CD11c/CD18 binding (GPR),fv,GPR",
+                    "Fragmentation (DP),cdrs;verniers,DP"]
+IMGT_LVERNIERS =[4, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 41, 42, 52, 53, 55, 84, 94, 118]
+IMGT_CDR1 = list(range(27, 38+1))
+IMGT_CDR2 = list(range(56, 65+1))
+IMGT_CDR2 = list(range(105, 117+1))
+IMGT_CDRs = [IMGT_CDR1, IMGT_CDR2, IMGT_CDR2]
 
 class FILTERING():
     """Initialise FILTERING"""
@@ -353,3 +371,108 @@ class FILTERING():
         all_scores.sort()
         idx = np.round(np.linspace(0, len(all_scores) - 1, n)).astype(int)
         return [df[df['AbLang2_confidence']==all_scores[i]].iloc[0]['light_sequence'] for i in idx]
+    
+def get_liabilities(light_seq_numbered: dict, liabilities: list, vernier: list, cdr: list):
+    """Check for liabilties in the light chain sequences.
+    Liabilties might be checked in the full VL, the CDRs or the vernier zone.
+    
+    Parameters
+    ----------
+    light_seq_numbered : dict
+        Mapping IMGT number (including insertions) to residues
+    liabilties : list
+        List of liabilities each element has the format: name, region, regex
+    vernier : list
+        Containing IMGT positions beloning to vernier region
+    cdr : list
+        Containing IMGT positions belonging to CDR regions. 
+    """
+    import re
+    
+    output_liabilities = []
+    for liability in liabilities:
+        name, region, regex = liability.split(",")
+        if region == 'fv':
+            positions_to_consider = list(range(1,128+1))
+        elif region == 'cdrs;verniers':
+            positions_to_consider = vernier + cdr
+        elif region == 'cdrs':
+            positions_to_consider = cdr
+        elif region == 'verniers':
+            positions_to_consider = vernier
+        elif region == 'nterminus':
+            positions_to_consider = [1]
+        else:
+            print(f'{region} unknown')
+            output_liabilities.append(None)
+            continue
+
+        sequence_to_consider = ''
+        positions_to_consider.sort() # sort the positions list
+        for pos, aa in light_seq_numbered.items():
+            try:
+                if int(re.search(r'\d+', pos).group()) in positions_to_consider:
+                    sequence_to_consider += aa
+                else:
+                    sequence_to_consider += '-' # Keep these because if checking multiple consecutive aa we need to keep the order   
+            except AttributeError:
+                print(f'AttributeError: {pos}, {aa}')
+                return None
+                
+        x = re.findall(regex, sequence_to_consider)
+        output_liabilities.append(len(x)) # store number of observed cases of this liability
+    return output_liabilities
+
+def get_sequence_liabilities(input: Union[List, pd.DataFrame], 
+                             ncpu: int =1):
+    """Get sequence liabilities for the generated light sequences.
+
+    Parameters
+    ----------
+    input : List pd.DataFrame
+        Generated sequences for which liabilities need to be determined
+    ncpu : int
+        Number of CPU used for ANARCII
+    """
+
+    try:
+        from anarcii import Anarcii
+    except ImportError as e:
+        raise ImportError(
+            """
+            ANARCII is required to run this function.
+            Please install it using the instructions in the README.
+            """
+        ) from e
+
+    # Load and run ANARCII
+    anarcii_model = Anarcii(seq_type="antibody", batch_size=128, cpu=True, ncpu=ncpu, mode="accuracy", verbose=False)
+    if type(input) != list:
+        sequences = input['generated_light'].to_list()
+    else:
+        sequences = input
+    anarcii_result = anarcii_model.number(sequences)
+
+    # Extract the numbering
+    list_numbering = []
+    for k, v in anarcii_result.items():
+        numbering_list = v['numbering']
+        dict_num = {}
+        for el in numbering_list:
+            if el[1]!='-':
+                dict_num[f'{el[0][0]}{el[0][1]}'.strip()] = el[1]
+        list_numbering.append(dict_num)
+
+    # Store output in a Dataframe
+    if type(input) != list:
+        df = input.copy()
+        df['IMGT_numbering'] = list_numbering
+    else:
+        df = pd.DataFrame({'generated_light': sequences,
+                          'IMGT_numbering': list_numbering})
+        
+    # # Get liabilities
+    liability_names = [x.split(',')[0] for x in LIST_LIABILITIES]
+    df[liability_names] = df.apply(lambda row: get_liabilities(row.IMGT_numbering, LIST_LIABILITIES, IMGT_LVERNIERS, [j for i in IMGT_CDRs for j in i]) if row['IMGT_numbering'] is not None else [None]*len(LIST_LIABILITIES), axis='columns', result_type='expand')
+
+    return df
