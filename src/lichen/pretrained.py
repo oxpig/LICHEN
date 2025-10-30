@@ -7,7 +7,6 @@ from typing import Union, List, Optional
 
 from .load_model import load_model, configure_cpus, configure_device
 from .utils import FILTERING, MAP_TYPE_SEED, MAP_GENE_FAM_SEED, MAP_GENE_SEED
-# passing_anarcii_filtering, passing_humatch, AbLang2_confidence, diversity_AbLang2
 
 class LICHEN():
     """Initialise LICHEN"""
