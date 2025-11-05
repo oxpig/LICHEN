@@ -17,3 +17,6 @@ dependencies = [
   "pandas",
   "biopython"
 ]
+
+[project.scripts]
+lichen = "lichen.cli:main"
