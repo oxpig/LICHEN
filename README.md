@@ -152,6 +152,17 @@ df_input = pd.DataFrame({'heavy': ['EVQLLESGGEVKKPGASVKVSCRASGYTFRNYGLTWVRQAPGQG
 result = lichen_model.light_perplexity(df_input)
 ```
 
+## Command line usage
+LICHEN can also run directly from the command line. This takes the heavy sequence, or a path to a fasta or csv file containing the heavy sequences as input. The output can be written to a csv file.
+```
+lichen EVQLLESGGEVKKPGASVKVSCRASGYTFRNYGLTWVRQAPGQGLEWMGWISAYNGNTNYAQKFQGRVTLTTDTSTSTAYMELRSLRSDDTAVYFCARDVPGHGAAFMDVWGTGTTVTVSS -o example_output.csv -v
+```
+
+For all command line options see:
+```
+lichen --help
+```
+
 ## Citation
 This work is described in our [paper](https://doi.org/10.1101/2025.08.06.668938):
 
