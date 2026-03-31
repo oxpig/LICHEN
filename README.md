@@ -164,17 +164,23 @@ lichen --help
 ```
 
 ## Citation
-This work is described in our [paper](https://doi.org/10.1101/2025.08.06.668938):
+This work is described in our [paper](https://www.nature.com/articles/s42003-026-09727-3):
 
-**LICHEN: Light-chain Immunoglobulin sequence generation Conditioned on the Heavy chain and Experimental Needs**
+**LICHEN enables light-chain immunoglobulin sequence generation conditioned on the heavy chain and experimental needs**
 
 ```
-@article{Capel2025,
-  title = {LICHEN: Light-chain Immunoglobulin sequence generation Conditioned on the Heavy chain and Experimental Needs},
+@article{Capel2026,
+  title = {LICHEN enables light-chain immunoglobulin sequence generation conditioned on the heavy chain and experimental needs},
   author = {Capel, Henriette L and Ellmen, Isaac and Murray, Chris J and Mignone, Giulia and Black, Megan and Clarke, Brendan and Breen, Conor and Tierney, Sean and Dougan, Patrick and Buick, Richard J and Greenshields-Watson, Alexander and Deane, Charlotte M},
-  journal = {bioRxiv},
-  year={2025},
-  doi = {https://doi.org/10.1101/2025.08.06.668938}
+  journal={Communications Biology},
+  year={2026},
+  publisher={Nature Publishing Group UK London},
+  volume = {9},
+  number = {1},
+  pages = {468},
+  doi = {10.1038/s42003-026-09727-3},
+  url = {https://doi.org/10.1038/s42003-026-09727-3},
+  issn = {2399-3642},
 }
 ```
 ## Web tool
