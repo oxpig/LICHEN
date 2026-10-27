@@ -15,7 +15,10 @@ dependencies = [
   "numpy",
   "torch",
   "pandas",
-  "biopython"
+  "biopython",
+  "psutil",
+  "anarcii",
+  "ablang2"
 ]
 
 [project.scripts]
