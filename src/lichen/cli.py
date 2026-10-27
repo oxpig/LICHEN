@@ -20,10 +20,12 @@ parser.add_argument(
     "-m",
     "--path_model",
     type=str,
-    default=f'{os.getcwd()}/model/model_weights.pt',
+    default=os.environ.get(
+        "LICHEN_MODEL_PATH", f'{os.getcwd()}/model/model_weights.pt'
+    ),
     help=(
-        "Path to model weights "
-        "(default: ./model/model_weights.pt)."
+        "Path to model weights (default: the LICHEN_MODEL_PATH "
+        "environment variable if set, otherwise ./model/model_weights.pt)."
     ),
 )
 parser.add_argument(
