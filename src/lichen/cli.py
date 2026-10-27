@@ -29,7 +29,7 @@ parser.add_argument(
 parser.add_argument(
     "-c",
     "--cpu",
-    default=False,
+    action="store_true",
     help="Run on CPU only, even if a GPU is available.",
 )
 parser.add_argument(
