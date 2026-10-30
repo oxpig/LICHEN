@@ -7,6 +7,7 @@ name = "lichen"
 version = "1.0.1"
 description = "Light-chain Immunoglobulin sequence generation Conditioned on the Heavy chain and Experimental Needs."
 readme = "README.md"
+requires-python = ">=3.11"
 license-files = ["LICENCE.txt"]
 authors = [
   { name = "Henriette L. Capel", email = "opig@stats.ox.ac.uk" },
