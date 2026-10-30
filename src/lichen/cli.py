@@ -135,7 +135,7 @@ def main(args=None):
     args = parser.parse_args(args)
 
     # Check if model weights stored
-    if not os.path.exists(os.path.dirname(args.path_model)):
+    if not os.path.isfile(args.path_model):
         raise FileNotFoundError(f"No model weights found in: {args.path_model}, " 
                                 "please save model weights (see https://github.com/oxpig/LICHEN) "
                                 "and provide path to these weights.")
@@ -148,7 +148,7 @@ def main(args=None):
 
     # Check type of input and run generation
     try:
-        if os.path.exists(os.path.dirname(args.input)):
+        if os.path.isfile(args.input):
             if args.input.endswith(".fasta"):
                 from Bio import SeqIO
                 # Process data in fasta
