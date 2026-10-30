@@ -7,7 +7,8 @@ name = "lichen"
 version = "1.0.1"
 description = "Light-chain Immunoglobulin sequence generation Conditioned on the Heavy chain and Experimental Needs."
 readme = "README.md"
-license-files = ["LICENCE"]
+requires-python = ">=3.11"
+license-files = ["LICENCE.txt"]
 authors = [
   { name = "Henriette L. Capel", email = "opig@stats.ox.ac.uk" },
 ]
@@ -15,7 +16,10 @@ dependencies = [
   "numpy",
   "torch",
   "pandas",
-  "biopython"
+  "biopython",
+  "psutil",
+  "anarcii",
+  "ablang2"
 ]
 
 [project.scripts]
